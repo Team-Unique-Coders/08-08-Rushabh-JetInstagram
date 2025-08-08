@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.dp
 
 val verticalPadding = 12.dp
 val horizontalPadding = 10.dp
-val bottomBarHeight = 50.dp
+val bottomBarHeight = 80.dp
 
 fun Modifier.icon() = this.size(24.dp)
 

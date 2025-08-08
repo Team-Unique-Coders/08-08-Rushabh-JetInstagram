@@ -99,8 +99,8 @@ private fun BottomBar(
       val iconRes = if (selected) section.selectedIcon else section.icon
 
       BottomNavigationItem(
+          modifier = Modifier.padding(bottom= 12.dp),
           icon = {
-
             if (section == Profile) {
               BottomBarProfile(selected)
             } else {

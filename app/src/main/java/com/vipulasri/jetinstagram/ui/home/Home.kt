@@ -1,8 +1,12 @@
 package com.vipulasri.jetinstagram.ui.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
@@ -26,22 +30,32 @@ import kotlinx.coroutines.launch
 
 @ExperimentalFoundationApi
 @Composable
-fun Home() {
+fun Home(
+  listState: LazyListState,
+  isScrollingUp: Boolean
+) {
 
   val coroutineScope = rememberCoroutineScope()
+  val posts by PostsRepository.posts
+  val stories by StoriesRepository.observeStories()
 
-  Scaffold(
-    topBar = { Toolbar() }) {
-    val posts by PostsRepository.posts
-    val stories by StoriesRepository.observeStories()
+  Column {
+    AnimatedVisibility(
+      visible = isScrollingUp,
+      enter = slideInVertically(initialOffsetY = { -it }),
+      exit = slideOutVertically(targetOffsetY = { -it })
+    ) {
+      Toolbar()
+    }
 
-    LazyColumn {
+    LazyColumn(state = listState) {
       item {
         StoriesSection(stories)
         Divider()
       }
       itemsIndexed(posts) { _, post ->
-        Post(post,
+        Post(
+          post,
           onDoubleClick = {
             coroutineScope.launch {
               PostsRepository.performLike(post.id)

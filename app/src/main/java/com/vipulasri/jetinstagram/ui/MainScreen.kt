@@ -1,14 +1,19 @@
 package com.vipulasri.jetinstagram.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -32,6 +37,8 @@ import com.vipulasri.jetinstagram.ui.components.bottomBarHeight
 import com.vipulasri.jetinstagram.ui.components.icon
 import com.vipulasri.jetinstagram.ui.home.Home
 import com.vipulasri.jetinstagram.ui.reels.Reels
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @ExperimentalFoundationApi
 @Composable
@@ -41,15 +48,33 @@ fun MainScreen() {
 
     val navItems = HomeSection.values()
       .toList()
-  Scaffold(
 
-      bottomBar = {
-        BottomBar(
-            items = navItems,
-            currentSection = sectionState.value,
-            onSectionSelected = { sectionState.value = it},
-        )
-      }) { innerPadding ->
+    // Shared scroll state
+    val listState = rememberLazyListState()
+    var isScrollingUp by remember { mutableStateOf(true) }
+    var lastScrollOffset by remember { mutableStateOf(0) }
+
+    LaunchedEffect(listState.firstVisibleItemScrollOffset) {
+        val currentOffset = listState.firstVisibleItemScrollOffset
+        isScrollingUp = currentOffset < lastScrollOffset
+        lastScrollOffset = currentOffset
+    }
+
+    Scaffold(
+        bottomBar = {
+            AnimatedVisibility(
+                visible = isScrollingUp,
+                enter = slideInVertically(initialOffsetY = { it }),
+                exit = slideOutVertically(targetOffsetY = { it })
+            ) {
+                BottomBar(
+                    items = navItems,
+                    currentSection = sectionState.value,
+                    onSectionSelected = { sectionState.value = it }
+                )
+            }
+        }
+    ) { innerPadding ->
     val modifier = Modifier.padding(innerPadding)
         .windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Top))
     Crossfade(
@@ -57,7 +82,7 @@ fun MainScreen() {
         targetState = sectionState.value)
     { section ->
         when (section) {
-            Home -> Home()
+            Home -> Home(listState = listState, isScrollingUp = isScrollingUp)
             Reels -> Reels()
             Add -> Content(title = "Add Post options")
             Favorite -> Content(title = "Favorite")

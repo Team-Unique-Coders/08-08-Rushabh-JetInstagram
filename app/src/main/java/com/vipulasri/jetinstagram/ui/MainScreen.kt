@@ -42,6 +42,7 @@ fun MainScreen() {
     val navItems = HomeSection.values()
       .toList()
   Scaffold(
+
       bottomBar = {
         BottomBar(
             items = navItems,
@@ -50,6 +51,7 @@ fun MainScreen() {
         )
       }) { innerPadding ->
     val modifier = Modifier.padding(innerPadding)
+        .windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Top))
     Crossfade(
         modifier = modifier,
         targetState = sectionState.value)

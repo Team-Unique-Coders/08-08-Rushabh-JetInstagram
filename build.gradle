@@ -3,7 +3,7 @@ import com.vipulasri.jetinstagram.buildsrc.Libs
 buildscript {
   repositories {
     google()
-    jcenter()
+    mavenCentral()
     maven { url "https://jitpack.io" }
   }
   dependencies {
@@ -15,7 +15,7 @@ buildscript {
 allprojects {
   repositories {
     google()
-    jcenter()
+    mavenCentral()
     maven { url "https://jitpack.io" }
   }
 }

@@ -6,13 +6,13 @@ plugins {
 }
 
 android {
-  compileSdkVersion 30
-  buildToolsVersion "30.0.3"
+  namespace = "com.vipulasri.jetinstagram"
+  compileSdkVersion 36
 
   defaultConfig {
     applicationId "com.vipulasri.jetinstagram"
-    minSdkVersion 21
-    targetSdkVersion 30
+    minSdkVersion 25
+    targetSdkVersion 36
     versionCode 1
     versionName "1.0"
 
@@ -33,7 +33,6 @@ android {
 
   kotlinOptions {
     jvmTarget = '1.8'
-    useIR = true
   }
 
   buildFeatures {

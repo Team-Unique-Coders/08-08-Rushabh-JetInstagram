@@ -20,7 +20,7 @@ object PostsRepository {
     (0..9).forEach { index ->
       val post = Post(
           id = index + 1,
-          image = "https://source.unsplash.com/random/400x300?$index",
+          image = "https://picsum.photos/500/400\n",
           user = User(
               name = names[index],
               username = names[index],

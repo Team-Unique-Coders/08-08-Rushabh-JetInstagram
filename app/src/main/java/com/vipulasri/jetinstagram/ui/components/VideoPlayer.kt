@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.exoplayer2.C
+import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
@@ -23,49 +24,38 @@ fun VideoPlayer(uri: Uri) {
     val context = LocalContext.current
 
     val exoPlayer = remember {
-        SimpleExoPlayer.Builder(context)
-            .build()
-            .apply {
-                val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(
-                    context,
-                    Util.getUserAgent(context, context.packageName)
-                )
-
-                val source = ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(uri)
-
-                this.prepare(source)
-            }
+        SimpleExoPlayer.Builder(context).build().apply {
+            val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(
+                context,
+                Util.getUserAgent(context, context.packageName)
+            )
+            val mediaItem = MediaItem.fromUri(uri)
+            val source = ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(mediaItem)
+            prepare(source)
+        }
     }
 
+    // Player setup options
     exoPlayer.playWhenReady = true
     exoPlayer.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
     exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
 
-/*    AndroidView(factory = {
+    // AndroidView to show PlayerView UI
+    AndroidView(factory = {
         PlayerView(context).apply {
             hideController()
             useController = false
             resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-
             player = exoPlayer
             layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
         }
-    })*/
+    })
 
-    DisposableEffect(AndroidView(factory = {
-        PlayerView(context).apply {
-            hideController()
-            useController = false
-            resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-
-            player = exoPlayer
-            layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
-        }
-    })) {
+    // Dispose ExoPlayer when this Composable leaves composition
+    DisposableEffect(Unit) {
         onDispose {
             exoPlayer.release()
         }
     }
-
 }

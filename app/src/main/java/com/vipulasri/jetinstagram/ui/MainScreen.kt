@@ -62,18 +62,12 @@ fun MainScreen() {
 
     Scaffold(
         bottomBar = {
-            AnimatedVisibility(
-                visible = isScrollingUp,
-                enter = slideInVertically(initialOffsetY = { it }),
-                exit = slideOutVertically(targetOffsetY = { it })
-            ) {
                 BottomBar(
                     items = navItems,
                     currentSection = sectionState.value,
                     onSectionSelected = { sectionState.value = it }
                 )
             }
-        }
     ) { innerPadding ->
     val modifier = Modifier.padding(innerPadding)
         .windowInsetsPadding(WindowInsets.statusBars.only(WindowInsetsSides.Top))

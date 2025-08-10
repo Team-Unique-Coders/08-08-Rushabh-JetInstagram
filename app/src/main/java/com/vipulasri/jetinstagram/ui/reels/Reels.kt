@@ -1,5 +1,6 @@
 package com.vipulasri.jetinstagram.ui.reels
 
+import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -49,6 +50,7 @@ private fun ReelsHeader() {
   }
 }
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
 private fun ReelsList() {
   val reels = ReelsRepository.getReels()

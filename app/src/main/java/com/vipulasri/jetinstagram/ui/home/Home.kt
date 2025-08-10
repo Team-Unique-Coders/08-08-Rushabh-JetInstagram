@@ -7,12 +7,12 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
@@ -30,12 +30,32 @@ import kotlinx.coroutines.launch
 
 @ExperimentalFoundationApi
 @Composable
-fun Home(
-  listState: LazyListState,
-  isScrollingUp: Boolean
-) {
-
+fun Home() {
+  val listState = rememberLazyListState()
   val coroutineScope = rememberCoroutineScope()
+
+  // Keep track of previous scroll offset for direction detection
+  var previousOffset by remember { mutableStateOf(0) }
+  var previousIndex by remember { mutableStateOf(0) }
+
+  // Scroll direction state: true means scrolling up or at top (show toolbar)
+  var isScrollingUp by remember { mutableStateOf(true) }
+
+  // Observe scroll changes and detect direction
+  LaunchedEffect(listState) {
+    snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
+      .collect { (index, offset) ->
+        // Compare current position to previous position
+        isScrollingUp = when {
+          index < previousIndex -> true // Scrolled up to earlier items
+          index > previousIndex -> false // Scrolled down to later items
+          else -> offset < previousOffset // Same item, compare offset
+        }
+        previousIndex = index
+        previousOffset = offset
+      }
+  }
+
   val posts by PostsRepository.posts
   val stories by StoriesRepository.observeStories()
 
@@ -43,7 +63,7 @@ fun Home(
     AnimatedVisibility(
       visible = isScrollingUp,
       enter = slideInVertically(initialOffsetY = { -it }),
-      exit = slideOutVertically(targetOffsetY = { -it })
+      exit = slideOutVertically(targetOffsetY = { -it }),
     ) {
       Toolbar()
     }
@@ -51,11 +71,11 @@ fun Home(
     LazyColumn(state = listState) {
       item {
         StoriesSection(stories)
-        Divider()
+        Spacer(Modifier.height(8.dp))
       }
       itemsIndexed(posts) { _, post ->
         Post(
-          post,
+          post = post,
           onDoubleClick = {
             coroutineScope.launch {
               PostsRepository.performLike(post.id)
@@ -80,21 +100,16 @@ private fun Toolbar() {
       .height(56.dp)
       .padding(horizontal = 10.dp),
     horizontalArrangement = Arrangement.SpaceBetween,
-    verticalAlignment = Alignment.CenterVertically
+    verticalAlignment = Alignment.CenterVertically,
   ) {
-    Box(
-      modifier = Modifier.padding(6.dp),
-      contentAlignment = Alignment.Center
-    ) {
-      Icon(
-        ImageVector.vectorResource(id = R.drawable.ic_instagram),
-        contentDescription = ""
-      )
-    }
     Icon(
-      ImageBitmap.imageResource(id = R.drawable.ic_dm),
+      imageVector = ImageVector.vectorResource(id = R.drawable.ic_instagram),
+      contentDescription = null
+    )
+    Icon(
+      bitmap = ImageBitmap.imageResource(id = R.drawable.ic_dm),
       modifier = Modifier.icon(),
-      contentDescription = ""
+      contentDescription = null
     )
   }
 }
@@ -109,7 +124,7 @@ private fun StoriesSection(stories: List<Story>) {
 
 @Composable
 private fun StoriesList(stories: List<Story>) {
-  LazyRow {
+  androidx.compose.foundation.lazy.LazyRow {
     itemsIndexed(stories) { index, story ->
 
       if (index == 0) {
@@ -125,7 +140,7 @@ private fun StoriesList(stories: List<Story>) {
         Text(story.name, style = MaterialTheme.typography.caption)
       }
 
-      if (index == stories.size.minus(1)) {
+      if (index == stories.size - 1) {
         Spacer(modifier = Modifier.width(6.dp))
       }
     }
@@ -137,7 +152,7 @@ private fun StoriesList(stories: List<Story>) {
 private fun Post(
   post: Post,
   onDoubleClick: (Post) -> Unit,
-  onLikeToggle: (Post) -> Unit
+  onLikeToggle: (Post) -> Unit,
 ) {
   PostView(post, onDoubleClick, onLikeToggle)
 }

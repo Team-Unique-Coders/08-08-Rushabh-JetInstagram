@@ -38,7 +38,8 @@ import com.vipulasri.jetinstagram.ui.components.icon
 import com.vipulasri.jetinstagram.ui.home.Home
 import com.vipulasri.jetinstagram.ui.reels.Reels
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import com.vipulasri.jetinstagram.ui.favorite.Favorites
+import com.vipulasri.jetinstagram.ui.profile.Profile
 
 @ExperimentalFoundationApi
 @Composable
@@ -49,16 +50,7 @@ fun MainScreen() {
     val navItems = HomeSection.values()
       .toList()
 
-    // Shared scroll state
-    val listState = rememberLazyListState()
-    var isScrollingUp by remember { mutableStateOf(true) }
-    var lastScrollOffset by remember { mutableStateOf(0) }
 
-    LaunchedEffect(listState.firstVisibleItemScrollOffset) {
-        val currentOffset = listState.firstVisibleItemScrollOffset
-        isScrollingUp = currentOffset < lastScrollOffset
-        lastScrollOffset = currentOffset
-    }
 
     Scaffold(
         bottomBar = {
@@ -76,11 +68,11 @@ fun MainScreen() {
         targetState = sectionState.value)
     { section ->
         when (section) {
-            Home -> Home(listState = listState, isScrollingUp = isScrollingUp)
+            Home -> Home()
             Reels -> Reels()
-            Add -> Content(title = "Add Post options")
-            Favorite -> Content(title = "Favorite")
-            Profile -> Content(title = "Profile")
+            Add -> Content("ADD")
+            Favorite -> Favorites()
+            Profile -> Profile()
         }
     }
   }

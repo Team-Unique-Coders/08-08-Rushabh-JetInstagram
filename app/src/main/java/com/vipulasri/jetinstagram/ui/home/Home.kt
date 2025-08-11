@@ -34,22 +34,22 @@ fun Home() {
   val listState = rememberLazyListState()
   val coroutineScope = rememberCoroutineScope()
 
-  // Keep track of previous scroll offset for direction detection
+
   var previousOffset by remember { mutableStateOf(0) }
   var previousIndex by remember { mutableStateOf(0) }
 
-  // Scroll direction state: true means scrolling up or at top (show toolbar)
+
   var isScrollingUp by remember { mutableStateOf(true) }
 
-  // Observe scroll changes and detect direction
+
   LaunchedEffect(listState) {
     snapshotFlow { listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset }
       .collect { (index, offset) ->
-        // Compare current position to previous position
+
         isScrollingUp = when {
-          index < previousIndex -> true // Scrolled up to earlier items
-          index > previousIndex -> false // Scrolled down to later items
-          else -> offset < previousOffset // Same item, compare offset
+          index < previousIndex -> true
+          index > previousIndex -> false
+          else -> offset < previousOffset
         }
         previousIndex = index
         previousOffset = offset
